@@ -46,7 +46,7 @@ class Server {
             // Load the server
             this.log(`Starting on port ${this.port}`);
         
-            const server = imports.http.createServer(this.incomingMessage);
+            const server = imports.http.createServer(this.incomingMessage.bind(this));
             server.listen(this.port);
         }
     }
@@ -104,7 +104,7 @@ class Server {
             } else reject(404);
         }).then((params) => {
             let {data, headers} = params == undefined ? {data: "", headers: undefined} : params;
-            console.log(200, req.url);
+            this.log([200, req.url].join(" "));
             
             // Set status code and headers
             res.statusCode = 200;
@@ -117,7 +117,7 @@ class Server {
             res.end(data);
         }).catch((err) => {
             // Log and close the connection due to an error
-            log([err, req.url].join(" "), -1);
+            this.log([err, req.url].join(" "), -1);
 
             res.statusCode = err != undefined || +err == NaN ? err : 500;
             res.end();
@@ -144,4 +144,4 @@ class Server {
     }
 }
 
-exports = Server;
+module.exports = Server;

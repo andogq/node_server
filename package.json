@@ -1,0 +1,19 @@
+{
+  "name": "@ando.gq/server",
+  "version": "0.0.1",
+  "description": "Simple HTTP server for static files and a hook for an API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/tom-ando/nodejs-server.git"
+  },
+  "author": "Tom Anderson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/tom-ando/nodejs-server/issues"
+  },
+  "homepage": "https://gitlab.com/tom-ando/nodejs-server#readme"
+}

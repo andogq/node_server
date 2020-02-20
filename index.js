@@ -87,14 +87,14 @@ class Server {
             
             if (url.pathname == "/") url.pathname = "/index.html";
 
-            if (url.pathname.indexOf(this.apiTip) == 0) {
+            if (url.pathname.indexOf(this.api.tip) == 0) {
                 // Collect POST data
                 let data = "";
                 req.setEncoding("utf8");
                 req.on("data", (chunk) => {data += chunk});
                 req.on("end", () => {
                     // Make the API call
-                    this.api({url: url.pathname.replace(globals.apiTip, ""), data, resolve, reject});
+                    this.api.handler({url: url.pathname.replace(this.api.tip, ""), data, resolve, reject});
                 });
             } else if (/^\/(?:\w+\/)*\w+\.\w+$/.test(url.pathname)) {
                 let name = url.pathname == "/" ? "index.html" : url.pathname.substr(1);

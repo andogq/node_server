@@ -1,6 +1,6 @@
 {
   "name": "@ando.gq/server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple HTTP server for static files and a hook for an API",
   "main": "index.js",
   "scripts": {

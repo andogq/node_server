@@ -96,7 +96,7 @@ class Server {
                     // Make the API call
                     this.api.handler({
                         url: url.pathname.replace(this.api.tip, ""),
-                        data,
+                        data: JSON.parse(data),
                         ip: req.headers["x-real-ip"] || req.connection.remoteAddress,
                         resolve,
                         reject

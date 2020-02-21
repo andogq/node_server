@@ -53,7 +53,7 @@ class Server {
 
     fetchFile(fileName) {
         return new Promise((resolve, reject) => {
-            if (Object.keys(this.cache).indexOf(fileName) != -1 && !debug) {
+            if (Object.keys(this.cache).indexOf(fileName) != -1 && !this.debug) {
                 // Fetch file and mime from cache
                 resolve(this.cache[fileName]);
             } else {
@@ -103,7 +103,7 @@ class Server {
                     });
                 });
             } else if (/^\/(?:\w+\/)*\w+\.\w+$/.test(url.pathname)) {
-                let name = url.pathname == "/" ? "index.html" : url.pathname.substr(1);
+                let name = url.pathname.substr(1);
                 this.fetchFile(name).then(({file, mime}) => {
                     resolve({data: file, headers: {"Content-Type": mime}});
                 }).catch(() => {reject(404)});

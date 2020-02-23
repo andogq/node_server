@@ -93,10 +93,15 @@ class Server {
                 req.setEncoding("utf8");
                 req.on("data", (chunk) => {data += chunk});
                 req.on("end", () => {
+                    try {
+                        data = JSON.parse(data);
+                    } catch(e) {
+                        data = ""
+                    }
                     // Make the API call
                     this.api.handler({
                         url: url.pathname.replace(this.api.tip, ""),
-                        data: JSON.parse(data),
+                        data,
                         ip: req.headers["x-real-ip"] || req.connection.remoteAddress,
                         resolve,
                         reject

@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/andogq/node_server/issues"
   },
-  "homepage": "https://github.com/andogq/node_server"
+  "homepage": "https://github.com/andogq/node_server",
+  "dependencies": {
+    "@types/node": "^13.11.0"
+  }
 }

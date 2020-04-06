@@ -1,10 +1,8 @@
 // Imports
-const imports = {
-    http: require("http"),
-    url: require("url"),
-    fs: require("fs"),
-    path: require("path")
-}
+let http = require("http");
+let url = require("url");
+let fs = require("fs");
+let path = require("path");
 
 // Globals
 const mimeTypes = {
@@ -16,23 +14,43 @@ const mimeTypes = {
     "jpg": "image/jpeg"
 }
 
+interface ApiHandlerParameters {
+    url: string,
+    data: string,
+    ip: string
+}
+
+interface ServerApi {
+    tip: string,
+    handler: (params: ApiHandlerParameters) => {statusCode: number, data: string, headers}
+}
+
+interface ServerOptions {
+    port: number,
+    publicFolder: string,
+    api?: ServerApi,
+    debug: boolean
+}
+
 class Server {
-    constructor({port, publicFolder, debug, api}) {
+    initialised: boolean;
+    cache: object;
+
+    // Supplied by the user
+    port: number;
+    publicFolder: string;
+    api?: ServerApi;
+    debug: boolean;
+
+    constructor({port = 8080, publicFolder = "public", api, debug = false}: ServerOptions) {
         // Set the globals and their defaults
-        this.port = port == undefined ? 8080 : port;
-        this.publicFolder = publicFolder == undefined ? "public" : publicFolder;
-        this.debug = debug == undefined ? false : debug;
-        this.api = api == undefined ? false : api;
+        this.port = port;
+        this.publicFolder = publicFolder;
+        this.debug = debug;
+        this.api = api;
 
         this.initialised = false;
         this.cache = {};
-
-        // Setup the API
-        if (this.api != false) {
-            this.api.tip = this.api.tip == undefined ? "/api" : this.api.tip;
-            // Handler function required
-            if (this.api.handler == undefined) this.api = false;
-        }
 
         this.init();
     }
@@ -46,7 +64,7 @@ class Server {
             // Load the server
             this.log(`Starting on port ${this.port}`);
         
-            const server = imports.http.createServer(this.incomingMessage.bind(this));
+            const server = http.createServer(this.incomingMessage.bind(this));
             server.listen(this.port);
         }
     }
@@ -58,14 +76,14 @@ class Server {
                 resolve(this.cache[fileName]);
             } else {
                 // Resolve the path of the file
-                let path = imports.path.resolve(this.publicFolder, fileName);
+                let filePath = path.resolve(this.publicFolder, fileName);
     
                 // Read the contents of the file
-                imports.fs.readFile(path, (err, file) => {
+                fs.readFile(filePath, (err, file) => {
                     if (err) reject(err);
     
                     // Get mime type of file
-                    let ext = imports.path.parse(path).ext.substr(1);
+                    let ext = path.parse(filePath).ext.substr(1);
                     let mime = mimeTypes[ext];
                     mime = mime == undefined ? "text/plain" : mime;
     
@@ -83,11 +101,11 @@ class Server {
         // Asynchronously fetch the file
         new Promise((resolve, reject) => {
             // Parse the url
-            let url = imports.url.parse(req.url);
+            let reqUrl = url.parse(req.url);
             
-            if (url.pathname == "/") url.pathname = "/index.html";
+            if (reqUrl.pathname == "/") reqUrl.pathname = "/index.html";
 
-            if (url.pathname.indexOf(this.api.tip) == 0 && req.method == "POST") {
+            if (this.api && reqUrl.pathname.indexOf(this.api.tip) == 0 && req.method == "POST") {
                 // Collect POST data
                 let data = "";
                 req.setEncoding("utf8");
@@ -100,20 +118,20 @@ class Server {
                     }
                     // Make the API call
                     this.api.handler({
-                        url: url.pathname.replace(this.api.tip, ""),
+                        url: reqUrl.pathname.replace(this.api.tip, ""),
                         data,
                         ip: req.headers["x-real-ip"] || req.connection.remoteAddress,
                         resolve,
                         reject
                     });
                 });
-            } else if (/^\/(?:\w+\/)*\w+\.\w+$/.test(url.pathname)) {
-                let name = url.pathname.substr(1);
+            } else if (/^\/(?:\w+\/)*\w+\.\w+$/.test(reqUrl.pathname)) {
+                let name = reqUrl.pathname.substr(1);
                 this.fetchFile(name).then(({file, mime}) => {
                     resolve({data: file, headers: {"Content-Type": mime}});
                 }).catch(() => {reject(404)});
             } else reject(404);
-        }).then((params) => {
+        }).then((params: {data: string, headers?: string[]}) => {
             let {data, headers} = params == undefined ? {data: "", headers: undefined} : params;
             this.log([200, req.url].join(" "));
             
@@ -135,7 +153,7 @@ class Server {
         });
     }
 
-    log(message, level) {
+    log(message: string, level? : number = 0) {
         let symbol;
         switch (level) {
             case 0:
